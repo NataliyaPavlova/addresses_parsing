@@ -1,5 +1,13 @@
 # addresses_parsing
 
+# How to start
+You should download parsing.py to your computer and launch it in console. It uses Python3.
+
+
+# What it does
+It parses a list of web-addresses from https://openphish.com/feed.txt, make a dict from each address (with keys 'protocol, 'domain'/'ip' and 'rel_url') and saves a list of dicts to the file result.json
+
+
 '''
 Задание:
 Имеется список адресов, выложенный на https://openphish.com/feed.txt
@@ -21,3 +29,5 @@
                127.0.0.1 --> {"protocol": "http", "ip": "127.0.0.1", "rel_url": "/"}
                http://xn--90adear.xn--p1ai/ --> {'protocol': 'http', 'domain': 'гибдд.рф', 'rel_url': '/'}
 '''
+
+
