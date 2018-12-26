@@ -56,7 +56,7 @@ class Adresses(WebPage):
             #if address doesn't start with 'http': default protocol is 'http'
             if len(string.split('://'))==1:
                 protocol = 'http'
-                part1 = string.split('://')[0]                 
+                part1, rel_url = re.split('/', string.split('://')[0], 1)              
             else:
                 protocol = string.split('://')[0]
                 part1, rel_url = re.split('/', string.split('://')[1], 1)
