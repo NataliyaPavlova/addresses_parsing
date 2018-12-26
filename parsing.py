@@ -23,33 +23,68 @@
 '''
 import pprint
 import requests
+import re
 import json
 
-web-page ->  download (make )
+# web-page ->  download (make a list of addresses)
+# addresses -> parsing
+#           -> make a list of dicts 
+# file -> jsonify
 
+class WebPage():
 
-
-
-
-def download(url):
-    r = requests.get(url)
-    lst_addreses = str(r.content).split('\\n')
-    return lst_addreses
-
-def rec(data, filename):
-    with open(filename, 'w') as outfile:
-        json.dump(data, outfile)
+    def __init__(self, url):
+        self.url = url
     
+    def download(self):
+        r = requests.get(self.url)
+        self.addrs_lst = str(r.content).split('\\n')
 
-def parsing(lst_addresses):
-    for address in lst_addresses:
-    #if starts with digits -> parse_ip
-    #else: -> parse_domain
-    #return lst_dct
+
+class Adresses(WebPage):
+
+    def check_punycode(self, string):
+        # check if domain is punycode 
+        if re.search('(\A)xn--', string): 
+            string = string.encode().decode('idna') 
+        return string
+
+    def parsing(self):
+        self.lst=[]
+        for string in self.addrs_lst:
+            if not re.search('(\A)http', string): 
+                print('Wrong string is {}'.format(string))
+                continue
+            protocol = string.split('://')[0]
+            dct = {'protocol' : protocol}
+            part1 = re.split('/', string.split('://')[1], 1)[0]
+            rel_url = '/' + re.split('/', string.split('://')[1], 1)[1] #if re.split('/', string.split('://')[0], 1)[1] else '/'
+
+            #check if IP (do not validate IP address, only simple check)
+            if re.match('^[0-9\.]*$', part1):
+                dct['ip'] = part1
+            else: 
+                domain = self.check_punycode(part1)
+                dct['domain'] = domain
+            dct['rel_url'] = rel_url
+            self.lst.append(dct)
+        
+      
+class Answer(Adresses, WebPage):
+
+    def __init__(self, url, filename):
+        WebPage.__init__(self, url)
+        self.filename = filename
+
+    def jsonify(self):
+        with open(self.filename, 'w') as outfile:
+            json.dump(self.lst, outfile)
+
 
 url = 'https://openphish.com/feed.txt'
 filename = 'result.json'
 
-
-data = parsing(download(url))
-rec(data, filename)
+answer = Answer(url, filename)
+answer.download()
+answer.parsing()
+answer.jsonify()
